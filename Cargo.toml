@@ -1,7 +1,8 @@
 [package]
+authors = ["Gregory Sech <gregory.sech@gmail.com>"]
 name = "bubble-services"
-version = "0.1.0"
 edition = "2021"
+version = "0.1.0"
 
 [lib]
 path = "src/lib.rs"
@@ -26,7 +27,9 @@ thiserror = "1.0.63"
 serde = { version = "1.0.204", features = ["derive"] }
 secrecy = { version = "0.8.0", features = ["serde"] }
 serde-aux = "4.5.0"
-config = { git = "https://github.com/mehcode/config-rs", version = "0.14.0", features = ["toml"] }
+config = { git = "https://github.com/mehcode/config-rs", version = "0.14.0", features = [
+    "toml",
+] }
 askama_actix = "0.14.0"
 askama = { version = "0.12.1", features = ["with-actix-web"] }
 
