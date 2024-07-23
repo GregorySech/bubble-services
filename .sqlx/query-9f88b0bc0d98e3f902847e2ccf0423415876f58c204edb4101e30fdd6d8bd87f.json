@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT phone_number, user_name FROM call_requests",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "phone_number",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_name",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "9f88b0bc0d98e3f902847e2ccf0423415876f58c204edb4101e30fdd6d8bd87f"
+}

@@ -2,11 +2,12 @@ use std::net::TcpListener;
 
 use actix_web::{dev::Server, web, App, HttpServer};
 
+use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use tracing_actix_web::TracingLogger;
 
 use crate::{
-    configuration::Configuration,
-    routes::{healthcheck, home},
+    configuration::{Configuration, DatabaseConfiguration},
+    routes::{call_request, healthcheck, home},
 };
 
 pub struct Application {
@@ -47,9 +48,14 @@ async fn run(listener: TcpListener, base_url: String) -> Result<Server, std::io:
             .app_data(base_url.clone())
             .route("/", web::get().to(home))
             .route("/healthcheck", web::get().to(healthcheck))
+            .route("/call_request", web::get().to(call_request::get))
     })
     .listen(listener)?
     .run();
 
     Ok(server)
+}
+
+pub fn make_database_pool(configuration: &DatabaseConfiguration) -> Pool<Postgres> {
+    PgPoolOptions::new().connect_lazy_with(configuration.with_db())
 }

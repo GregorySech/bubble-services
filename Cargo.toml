@@ -13,6 +13,16 @@ name = "bubble-services"
 
 [dependencies]
 actix-web = "4.8.0"
+anyhow = "1.0.86"
+askama_actix = "0.14.0"
+askama = { version = "0.12.1", features = ["with-actix-web"] }
+chrono = { version = "0.4.35", default-features = false, features = ["clock"] }
+config = { git = "https://github.com/mehcode/config-rs", version = "0.14.0", features = [
+    "toml",
+] }
+secrecy = { version = "0.8.0", features = ["serde"] }
+serde = { version = "1.0.204", features = ["derive"] }
+serde-aux = "4.5.0"
 tracing = { version = "0.1.40", features = ["log"] }
 tracing-actix-web = "0.7.11"
 tracing-bunyan-formatter = "0.3.9"
@@ -21,19 +31,23 @@ tracing-subscriber = { version = "0.3.18", features = [
     "registry",
     "env-filter",
 ] }
-tokio = { version = "1.38.1", features = ["macros", "rt-multi-thread"] }
-anyhow = "1.0.86"
 thiserror = "1.0.63"
-serde = { version = "1.0.204", features = ["derive"] }
-secrecy = { version = "0.8.0", features = ["serde"] }
-serde-aux = "4.5.0"
-config = { git = "https://github.com/mehcode/config-rs", version = "0.14.0", features = [
-    "toml",
-] }
-askama_actix = "0.14.0"
-askama = { version = "0.12.1", features = ["with-actix-web"] }
+tokio = { version = "1.38.1", features = ["macros", "rt-multi-thread"] }
+
+[dependencies.sqlx]
+version = "0.7"
+default-features = false
+features = [
+    "runtime-tokio-rustls",
+    "macros",
+    "postgres",
+    "uuid",
+    "chrono",
+    "migrate",
+]
 
 [dev-dependencies]
 once_cell = "1.19.0"
 reqwest = "0.12.5"
+scraper = "0.19.1"
 serde_json = "1.0.120"
