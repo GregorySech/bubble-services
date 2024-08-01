@@ -13,7 +13,7 @@ An authenticated office-worker will find call requests in their dashboard. From 
 A base configuration can be found inside the `configuration` folder.
 To get sqlx to work locally you will need a running postgres database and define the connection url inside a `.env` file under the `DATABASE_URL`, follows an example.
 
-```.env
+```bash
 DATABASE_URL="postgres://postgres:password@localhost:5432/bubble_services"
 ```
 
