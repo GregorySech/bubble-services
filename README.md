@@ -16,3 +16,5 @@ To get sqlx to work locally you will need a running postgres database and define
 ```.env
 DATABASE_URL="postgres://postgres:password@localhost:5432/bubble_services"
 ```
+
+For preparing sqlx for offline compilation of all binary targets (for now tests) run: `cargo sqlx prepare -- --all-targets `.
