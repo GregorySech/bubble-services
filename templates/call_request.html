@@ -1,10 +1,12 @@
 {% extends "common.html" %} {% block content %}
 <h1>Call Request</h1>
-<form id="call-request-form">
+<form id="call-request-form" method="post" action="/call_request">
     <label for="phone"> Enter your phone number: </label>
     <input type="tel" id="phone" name="phone_number" required />
     <br />
     <label for="name"> Enter your name: </label>
     <input type="text" id="name" name="contact_name" required />
+    <br />
+    <input type="submit" />
 </form>
 {% endblock %}

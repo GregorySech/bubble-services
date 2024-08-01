@@ -2,7 +2,7 @@ use std::net::TcpListener;
 
 use actix_web::{dev::Server, web, App, HttpServer};
 
-use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+use sqlx::{postgres::PgPoolOptions, PgPool, Pool, Postgres};
 use tracing_actix_web::TracingLogger;
 
 use crate::{
@@ -25,7 +25,12 @@ impl Application {
         let listener = TcpListener::bind(address)?;
         let port = listener.local_addr()?.port();
 
-        let server = run(listener, configuration.application.base_url).await?;
+        let server = run(
+            listener,
+            configuration.application.base_url,
+            make_database_pool(&configuration.database),
+        )
+        .await?;
 
         Ok(Self { port, server })
     }
@@ -41,14 +46,21 @@ impl Application {
 
 pub struct ApplicationBaseUrl(pub String);
 
-async fn run(listener: TcpListener, base_url: String) -> Result<Server, std::io::Error> {
+async fn run(
+    listener: TcpListener,
+    base_url: String,
+    db_pool: PgPool,
+) -> Result<Server, std::io::Error> {
+    let db_pool = web::Data::new(db_pool);
     let server = HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger::default())
             .app_data(base_url.clone())
+            .app_data(db_pool.clone())
             .route("/", web::get().to(home))
             .route("/healthcheck", web::get().to(healthcheck))
             .route("/call_request", web::get().to(call_request::get))
+            .route("/call_request", web::post().to(call_request::post))
     })
     .listen(listener)?
     .run();
