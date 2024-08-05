@@ -1,3 +1,4 @@
+use reqwest::StatusCode;
 use scraper::{selectable::Selectable, ElementRef, Html, Selector};
 
 use crate::helpers::{assert_is_redirect_to, TestApp};
@@ -52,6 +53,41 @@ async fn call_request_page_should_have_form() {
         assert!(
             form.select(&name_input_selector).count() == 1,
             "There should be one name input"
+        );
+    }
+}
+
+#[tokio::test]
+async fn malformed_call_requests_are_rejected() {
+    let app = TestApp::spawn().await;
+
+    let test_cases = vec![
+        (
+            serde_json::json!({
+                "phone_number": "320 406 7090", // sorry if it's a correcy number.
+            }),
+            "missing contact_name",
+        ),
+        (
+            serde_json::json!({
+                "contact_name": "Gregory Sech",
+            }),
+            "missing phone_number",
+        ),
+        (serde_json::json!({}), "empty body"),
+    ];
+    for (body, description) in test_cases {
+        let response = app
+            .http_client
+            .post(format!("{}/call_request", &app.address))
+            .form(&body)
+            .send()
+            .await
+            .expect("Could not post call request form!");
+        assert!(
+            response.status() == StatusCode::BAD_REQUEST,
+            "The API did not return BAD_REQUEST when the payload was {}",
+            description
         );
     }
 }
