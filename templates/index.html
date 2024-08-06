@@ -1,9 +1,15 @@
 {% extends "common.html" %} {% block content %}
-<h1>Bubble Services</h1>
-<p>Hello {{ name }}</p>
+<h1>Actions</h1>
 <ul>
     <li>
         <a id="call-request-link" href="/call_request">Request Call</a>
     </li>
 </ul>
-{% endblock %}
+{% endblock %} {% block messages %} {% if messages.len() > 0 %}
+<h2>Messages</h2>
+<ul>
+    {% for message in messages %}
+    <li>{{message.level()}}: {{message.content()}}</li>
+    {% endfor %}
+</ul>
+{% endif %} {% endblock %}

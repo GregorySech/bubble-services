@@ -2,6 +2,7 @@ use actix_web::{
     http::{header::LOCATION, StatusCode},
     web, HttpResponse, Responder, ResponseError,
 };
+use actix_web_flash_messages::FlashMessage;
 use askama_actix::Template;
 use chrono::Utc;
 use serde::Deserialize;
@@ -51,6 +52,7 @@ pub async fn post(
     .execute(pool.get_ref())
     .await?;
 
+    FlashMessage::info("Call request registered. You will be called soon!").send();
     Ok(HttpResponse::SeeOther()
         .insert_header((LOCATION, "/"))
         .finish())

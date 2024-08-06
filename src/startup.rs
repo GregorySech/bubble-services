@@ -1,7 +1,12 @@
 use std::net::TcpListener;
 
-use actix_web::{dev::Server, web, App, HttpServer};
+use actix_web::{cookie::Key, dev::Server, web, App, HttpServer};
 
+use actix_web_flash_messages::{
+    storage::{CookieMessageStore, FlashMessageStore},
+    FlashMessagesFramework,
+};
+use secrecy::{ExposeSecret, Secret};
 use sqlx::{postgres::PgPoolOptions, PgPool, Pool, Postgres};
 use tracing_actix_web::TracingLogger;
 
@@ -29,6 +34,7 @@ impl Application {
             listener,
             configuration.application.base_url,
             make_database_pool(&configuration.database),
+            configuration.application.hmac_secret,
         )
         .await?;
 
@@ -50,10 +56,16 @@ async fn run(
     listener: TcpListener,
     base_url: String,
     db_pool: PgPool,
+    hmac_secret: Secret<String>,
 ) -> Result<Server, std::io::Error> {
     let db_pool = web::Data::new(db_pool);
+    let secret_key = Key::from(hmac_secret.expose_secret().as_bytes());
+    let message_backend = CookieMessageStore::builder(secret_key.clone()).build();
+    let message_framework = FlashMessagesFramework::builder(message_backend).build();
+
     let server = HttpServer::new(move || {
         App::new()
+            .wrap(message_framework.clone())
             .wrap(TracingLogger::default())
             .app_data(base_url.clone())
             .app_data(db_pool.clone())
