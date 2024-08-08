@@ -2,7 +2,7 @@ use actix_web::{
     http::{header::LOCATION, StatusCode},
     web, HttpResponse, Responder, ResponseError,
 };
-use actix_web_flash_messages::FlashMessage;
+use actix_web_flash_messages::{FlashMessage, IncomingFlashMessages};
 use askama_actix::Template;
 use chrono::Utc;
 use serde::Deserialize;
@@ -15,11 +15,15 @@ use super::error_chain_fmt;
 
 #[derive(Template)]
 #[template(path = "call_request.html")]
-struct CallRequestTemplate {}
+struct CallRequestTemplate {
+    messages: Vec<FlashMessage>,
+}
 
-#[instrument(name = "Call Request page")]
-pub async fn get() -> impl Responder {
-    CallRequestTemplate {}
+#[instrument(name = "Call Request page", skip(messages))]
+pub async fn get(messages: IncomingFlashMessages) -> impl Responder {
+    CallRequestTemplate {
+        messages: messages.iter().cloned().collect(),
+    }
 }
 
 /// Raw call request input that needs to be parsed.
@@ -73,6 +77,17 @@ impl std::fmt::Debug for CallRequestError {
 }
 
 impl ResponseError for CallRequestError {
+    fn error_response(&self) -> HttpResponse<actix_web::body::BoxBody> {
+        let error_content = match self {
+            CallRequestError::ValidationError(s) => s,
+            CallRequestError::InsertionError(_) => "Database error!",
+        };
+        FlashMessage::error(error_content).send();
+        HttpResponse::SeeOther()
+            .insert_header((LOCATION, "/call_request"))
+            .finish()
+    }
+
     fn status_code(&self) -> StatusCode {
         match self {
             CallRequestError::ValidationError(_) => StatusCode::BAD_REQUEST,

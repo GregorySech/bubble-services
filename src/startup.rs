@@ -2,17 +2,14 @@ use std::net::TcpListener;
 
 use actix_web::{cookie::Key, dev::Server, web, App, HttpServer};
 
-use actix_web_flash_messages::{
-    storage::{CookieMessageStore, FlashMessageStore},
-    FlashMessagesFramework,
-};
+use actix_web_flash_messages::{storage::CookieMessageStore, FlashMessagesFramework};
 use secrecy::{ExposeSecret, Secret};
 use sqlx::{postgres::PgPoolOptions, PgPool, Pool, Postgres};
 use tracing_actix_web::TracingLogger;
 
 use crate::{
     configuration::{Configuration, DatabaseConfiguration},
-    routes::{call_request, healthcheck, home},
+    routes::{call_request, healthcheck, home, login},
 };
 
 pub struct Application {
@@ -73,6 +70,7 @@ async fn run(
             .route("/healthcheck", web::get().to(healthcheck))
             .route("/call_request", web::get().to(call_request::get))
             .route("/call_request", web::post().to(call_request::post))
+            .route("/login", web::get().to(login::get))
     })
     .listen(listener)?
     .run();

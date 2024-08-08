@@ -16,6 +16,7 @@ struct HomeTemplate {
     messages: Vec<FlashMessage>,
 }
 
+#[tracing::instrument(name = "Home", skip(messages))]
 pub async fn home(messages: IncomingFlashMessages) -> impl Responder {
     let messages: Vec<FlashMessage> = messages.iter().cloned().collect();
 

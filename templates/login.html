@@ -1,0 +1,12 @@
+{% extends "common.html" %} {% block title %} Login {% endblock %} {% block
+content %}
+<h1>Login</h1>
+<form></form>
+{% endblock %} {% block messages %} {% if messages.len() > 0 %}
+<h2>Messages</h2>
+<ul>
+    {% for message in messages %}
+    <li>{{message.level()}}: {{message.content()}}</li>
+    {% endfor %}
+</ul>
+{% endif %} {% endblock %}
