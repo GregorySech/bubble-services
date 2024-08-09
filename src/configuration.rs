@@ -58,11 +58,10 @@ pub fn get_configuration() -> Result<Configuration, config::ConfigError> {
             configuration_directory.join("base.toml"),
         ))
         .add_source(
-            config::Environment::with_prefix("BUBBLE-SERVICES")
+            config::Environment::with_prefix("BUBBLE")
                 .prefix_separator("_")
                 .separator("__"),
         )
         .build()?;
-
     settings.try_deserialize::<Configuration>()
 }

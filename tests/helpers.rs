@@ -5,6 +5,7 @@ use bubble_services::{
 };
 use once_cell::sync::Lazy;
 use reqwest::{Response, Url};
+use serde::Serialize;
 use sqlx::{types::Uuid, ConnectOptions, Connection, Executor, PgConnection, PgPool};
 // Set's up telemetry once.
 static TRACING: Lazy<()> = Lazy::new(|| {
@@ -62,8 +63,7 @@ impl TestApp {
         let configuration = {
             let mut c = get_configuration().expect("Failed to load configuration.");
 
-            c.database.database_name =
-                format!("bubble_services_test_{}", Uuid::new_v4().to_string());
+            c.database.database_name = format!("bubble_services_test_{}", Uuid::new_v4());
             c.application.port = 0; // Connect to a free port!
             c
         };
@@ -81,6 +81,7 @@ impl TestApp {
 
         let client = reqwest::Client::builder()
             .redirect(reqwest::redirect::Policy::none())
+            .cookie_store(true)
             .build()
             .unwrap();
 
@@ -93,7 +94,7 @@ impl TestApp {
         }
     }
 
-    pub async fn get_home_page(self) -> Response {
+    pub async fn get_home_page(&self) -> Response {
         self.http_client
             .get(format!("{}/", &self.address))
             .send()
@@ -101,11 +102,23 @@ impl TestApp {
             .expect("Failed to get website home.")
     }
 
-    pub async fn get_call_request_page(self) -> Response {
+    pub async fn get_call_request_page(&self) -> Response {
         self.http_client
             .get(format!("{}/call_request", &self.address))
             .send()
             .await
-            .expect("Failed to get website home.")
+            .expect("Failed to get call request page.")
+    }
+
+    pub async fn post_call_request<Body>(&self, body: &Body) -> Response
+    where
+        Body: Serialize,
+    {
+        self.http_client
+            .post(format!("{}/call_request", &self.address))
+            .form(body)
+            .send()
+            .await
+            .expect("Could not post call request form!")
     }
 }

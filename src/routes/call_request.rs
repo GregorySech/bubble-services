@@ -19,11 +19,11 @@ struct CallRequestTemplate {
     messages: Vec<FlashMessage>,
 }
 
-#[instrument(name = "Call Request page", skip(messages))]
+#[instrument(name = "Call Request page", skip(messages), fields(num_messages))]
 pub async fn get(messages: IncomingFlashMessages) -> impl Responder {
-    CallRequestTemplate {
-        messages: messages.iter().cloned().collect(),
-    }
+    let messages: Vec<FlashMessage> = messages.iter().cloned().collect();
+    tracing::Span::current().record("num_messages", messages.len());
+    CallRequestTemplate { messages }
 }
 
 /// Raw call request input that needs to be parsed.

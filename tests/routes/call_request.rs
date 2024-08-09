@@ -77,18 +77,45 @@ async fn malformed_call_requests_are_rejected() {
         (serde_json::json!({}), "empty body"),
     ];
     for (body, description) in test_cases {
-        let response = app
-            .http_client
-            .post(format!("{}/call_request", &app.address))
-            .form(&body)
-            .send()
-            .await
-            .expect("Could not post call request form!");
+        let response = app.post_call_request(&body).await;
         assert!(
             response.status() == StatusCode::BAD_REQUEST,
             "The API did not return BAD_REQUEST when the payload was {}",
             description
         );
+    }
+}
+
+#[tokio::test]
+async fn bad_call_requests_redirect_and_display_error() {
+    let app = TestApp::spawn().await;
+    let test_cases = vec![
+        (
+            serde_json::json!({
+                "phone_number": "320 406 7090", // sorry if it's a correcy number.
+                "contact_name": "a"
+            }),
+            "bad contact_name",
+        ),
+        (
+            serde_json::json!({
+                "contact_name": "Gregory Sech",
+                "phone_number": "3"
+            }),
+            "bad phone_number",
+        ),
+    ];
+    for (body, description) in test_cases {
+        let err_response = app.post_call_request(&body).await;
+        assert_is_redirect_to(&err_response, "/call_request");
+        let response = app.get_call_request_page().await;
+        let response_text = response.text().await.unwrap_or_else(move |err| {
+            panic!(
+                "Could not get response text for test case {}. Error: {}",
+                description, err
+            )
+        });
+        assert!(response_text.contains("h2"),);
     }
 }
 
@@ -99,14 +126,7 @@ async fn submitting_call_request_form_adds_it_to_db() {
         "phone_number": "321 456 7891",
         "contact_name": "Rino Pape",
     });
-    let response = app
-        .http_client
-        .post(format!("{}/call_request", &app.address))
-        .form(&body)
-        .send()
-        .await
-        .expect("Could not post call request form!");
-
+    let response = app.post_call_request(&body).await;
     assert_is_redirect_to(&response, "/");
 
     let saved = sqlx::query!("SELECT phone_number, user_name FROM call_requests")

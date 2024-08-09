@@ -35,6 +35,9 @@ thiserror = "1.0.63"
 tokio = { version = "1.38.1", features = ["macros", "rt-multi-thread"] }
 validator = { version = "0.18.1", features = ["derive"] }
 actix-web-flash-messages = { version = "0.4.2", features = ["cookies"] }
+rand = "0.8.5"
+argon2 = { version = "0.5.3", features = ["std"] }
+reqwest = { version = "0.12.5", features = ["cookies"] }
 
 [dependencies.sqlx]
 version = "0.7"

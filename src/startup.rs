@@ -59,7 +59,6 @@ async fn run(
     let secret_key = Key::from(hmac_secret.expose_secret().as_bytes());
     let message_backend = CookieMessageStore::builder(secret_key.clone()).build();
     let message_framework = FlashMessagesFramework::builder(message_backend).build();
-
     let server = HttpServer::new(move || {
         App::new()
             .wrap(message_framework.clone())
